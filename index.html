@@ -13,6 +13,7 @@
             --accent: #38bdf8;
             --error: #f87171;
             --tab-inactive: #334155;
+            --success: #22c55e;
         }
 
         body {
@@ -45,7 +46,6 @@
             max-width: 400px;
         }
 
-        /* تنسيق الأزرار والمدخلات */
         input {
             width: 100%;
             padding: 12px;
@@ -57,12 +57,10 @@
             box-sizing: border-box;
             font-size: 1rem;
             text-align: center;
+            outline: none;
         }
 
-        button {
-            cursor: pointer;
-            transition: 0.3s;
-        }
+        input:focus { border-color: var(--accent); }
 
         .primary-btn {
             background: var(--accent);
@@ -72,21 +70,54 @@
             padding: 12px 25px;
             border-radius: 8px;
             width: 100%;
+            cursor: pointer;
+            transition: 0.3s;
         }
 
-        /* المحتوى الرئيسي (مخفي قبل الدخول) */
-        #mainContent { display: none; }
+        .primary-btn:hover { opacity: 0.9; transform: scale(0.98); }
 
-        /* باقي تنسيقات السيستم السابق */
+        /* المحتوى الرئيسي */
+        #mainContent { display: none; max-width: 600px; margin: 0 auto; }
+
         .tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; }
-        .tab-btn { padding: 12px 20px; border-radius: 8px; border: none; background: var(--tab-inactive); color: #94a3b8; flex: 1; max-width: 200px; font-weight: bold; }
+        .tab-btn { 
+            padding: 12px 20px; 
+            border-radius: 8px; 
+            border: none; 
+            background: var(--tab-inactive); 
+            color: #94a3b8; 
+            flex: 1; 
+            font-weight: bold; 
+            cursor: pointer;
+        }
         .tab-btn.active { background: var(--accent); color: #0f172a; }
-        .search-container { display: flex; gap: 10px; max-width: 500px; margin: 0 auto 20px; }
-        .card { background: var(--card-bg); padding: 20px; border-radius: 12px; border-right: 6px solid var(--accent); text-align: right; max-width: 500px; margin: 15px auto; animation: fadeIn 0.5s; }
-        .info-row { display: flex; justify-content: space-between; border-bottom: 1px solid #334155; padding: 8px 0; }
-        .label { color: #94a3b8; }
-        .loader { color: var(--accent); display: none; margin-bottom: 15px; }
-        .error-msg { color: var(--error); display: none; margin-top: 10px; }
+
+        .search-container { display: flex; gap: 10px; margin-bottom: 20px; }
+        
+        .card { 
+            background: var(--card-bg); 
+            padding: 20px; 
+            border-radius: 12px; 
+            border-right: 6px solid var(--accent); 
+            text-align: right; 
+            margin: 15px 0; 
+            box-shadow: 0 10px 15px rgba(0,0,0,0.2);
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .info-row { 
+            display: flex; 
+            justify-content: space-between; 
+            border-bottom: 1px solid #334155; 
+            padding: 10px 0; 
+        }
+        .info-row:last-child { border-bottom: none; }
+        
+        .label { color: #94a3b8; font-size: 0.9rem; }
+        .val { font-weight: bold; color: var(--text-primary); }
+
+        .loader { color: var(--accent); display: none; margin-bottom: 15px; font-weight: bold; }
+        .error-msg { color: var(--error); display: none; margin-top: 10px; font-weight: bold; }
         
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; } }
     </style>
@@ -95,8 +126,8 @@
 
 <div id="loginOverlay">
     <div class="login-box">
-        <h3>تسجيل دخول الموظفين</h3>
-        <p style="color: #94a3b8; font-size: 0.9rem;">يرجى إدخال كلمة المرور للمتابعة</p>
+        <h2 style="color: var(--accent);">Wavz</h2>
+        <p style="color: #94a3b8;">يرجى إدخال كلمة المرور للوصول للبيانات</p>
         <input type="password" id="passInput" placeholder="كلمة المرور">
         <button class="primary-btn" onclick="checkAuth()">دخول</button>
         <div id="loginError" class="error-msg">كلمة المرور غير صحيحة!</div>
@@ -105,28 +136,29 @@
 
 <div id="mainContent">
     <header>
-        <h2 id="mainTitle">استعلام البلاغات</h2>
-        <div id="loadingStatus" class="loader">جاري جلب البيانات...</div>
+        <h2 id="mainTitle">Wavz</h2>
+        <div id="loadingStatus" class="loader">جاري تحديث البيانات...</div>
     </header>
 
     <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('reports', this)">Issues</button>
+        <button class="tab-btn active" onclick="switchTab('reports', this)">المشاكل</button>
         <button class="tab-btn" onclick="switchTab('lost', this)">بدل فاقد</button>
     </div>
 
     <div class="search-container">
-        <input type="number" id="idInput" placeholder="أدخل الرقم القومي هنا...">
+        <input type="number" id="idInput" placeholder="أدخل الرقم القومي للبحث...">
         <button id="searchBtn" class="primary-btn" style="width: auto;" onclick="handleSearch()">بحث</button>
     </div>
 
-    <div id="errorMessage" class="error-msg">البيانات غير متوفرة</div>
+    <div id="errorMessage" class="error-msg">عذراً، لم يتم العثور على بيانات لهذا الرقم</div>
     <div id="resultArea"></div>
 </div>
 
 <script>
+    // معرف الملف الخاص بك
     const sheetId = '1EcVR1-toOMYuQahiFYWJXLx28rwBud1Pnws6WpMn7EY';
     
-    // روابط الشيتات
+    // روابط الصفحات (تأكد أن الأسماء في الشيت مطابقة تماماً لـ Sheet1 و Lost و Auth)
     const urls = {
         reports: `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=Sheet1`,
         lost: `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=Lost`,
@@ -135,7 +167,7 @@
 
     let currentTab = 'reports';
 
-    // 1. وظيفة التحقق من الباسورد
+    // التحقق من صلاحية الدخول
     async function checkAuth() {
         const passInput = document.getElementById('passInput').value;
         const errorMsg = document.getElementById('loginError');
@@ -143,14 +175,14 @@
         if (!passInput) return;
 
         try {
-            // جلب بيانات شيت Auth بلحظتها
             const response = await fetch(`${urls.auth}&t=${Date.now()}`);
             const csvText = await response.text();
             
             Papa.parse(csvText, {
                 header: true,
                 complete: function(results) {
-                    const passwords = results.data.map(row => String(row.Password).trim());
+                    // جلب كلمات السر من عمود Password
+                    const passwords = results.data.map(row => String(row.Password || row.password).trim());
                     
                     if (passwords.includes(passInput.trim())) {
                         document.getElementById('loginOverlay').style.display = 'none';
@@ -161,29 +193,33 @@
                 }
             });
         } catch (e) {
-            alert("فشل الاتصال بالسيرفر للتحقق من الصلاحية");
+            alert("حدث خطأ في الاتصال بشيت Auth");
         }
     }
 
-    // 2. وظائف السيستم الأساسية
+    // تبديل الأقسام
     function switchTab(tab, btn) {
         currentTab = tab;
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        document.getElementById('mainTitle').innerText = tab === 'reports' ? 'استعلام البلاغات' : 'استعلام بدل الفاقد';
+        document.getElementById('mainTitle').innerText = tab === 'reports' ? 'استعلام البلاغات والمشاكل' : 'استعلام بدل الفاقد';
         document.getElementById('resultArea').innerHTML = '';
         document.getElementById('errorMessage').style.display = 'none';
         document.getElementById('idInput').value = '';
     }
 
+    // البحث اللحظي عن البيانات
     async function handleSearch() {
         const inputVal = document.getElementById('idInput').value.trim();
         const loader = document.getElementById('loadingStatus');
+        const resultArea = document.getElementById('resultArea');
+        const errorMsg = document.getElementById('errorMessage');
+
         if (!inputVal) return;
 
         loader.style.display = 'block';
-        document.getElementById('errorMessage').style.display = 'none';
-        document.getElementById('resultArea').innerHTML = '';
+        errorMsg.style.display = 'none';
+        resultArea.innerHTML = '';
 
         try {
             const res = await fetch(`${urls[currentTab]}&t=${Date.now()}`);
@@ -192,41 +228,52 @@
             Papa.parse(text, {
                 header: true,
                 complete: function(results) {
+                    // البحث عن الرقم القومي في عمود ID
                     const citizen = results.data.find(item => String(item.ID).trim() === inputVal);
                     loader.style.display = 'none';
                     
                     if (citizen) {
                         renderCard(citizen);
                     } else {
-                        document.getElementById('errorMessage').style.display = 'block';
+                        errorMsg.style.display = 'block';
                     }
                 }
             });
         } catch (e) {
-            loader.innerText = "خطأ في جلب البيانات";
+            loader.innerText = "فشل جلب البيانات من جوجل شيت";
         }
     }
 
+    // عرض الكارت بناءً على القسم المختار
     function renderCard(item) {
         let content = '';
+        
         if (currentTab === 'reports') {
+            // بيانات المشاكل (Sheet1)
             content = `
                 <div class="info-row"><span class="label">الاسم:</span><span class="val">${item.Name || '-'}</span></div>
-                <div class="info-row"><span class="label">رقم التيكت:</span><span class="val">${item.Ticket || '-'}</span></div>
-                <div class="info-row"><span class="label">الفرع:</span><span class="val">${item.Branch || '-'}</span></div>
-                <div class="info-row" style="border:none"><span class="label">ملاحظات:</span><span class="val">${item.comment || '-'}</span></div>
+                <div class="info-row"><span class="label">رقم الهاتف:</span><span class="val">${item.Phone || '-'}</span></div>
+                <div class="info-row"><span class="label">اسم المشكلة:</span><span class="val">${item.Type || '-'}</span></div>
+                <div class="info-row"><span class="label">رقم التيكت:</span><span class="val">${item.Ticket || 'لا يوجد'}</span></div>
+                <div class="info-row"><span class="label">اسم الفرع:</span><span class="val">${item.Branch || '-'}</span></div>
+                <div class="info-row"><span class="label">التاريخ:</span><span class="val">${item.Date || '-'}</span></div>
+                <div class="info-row" style="border:none"><span class="label">الملاحظات:</span><span class="val">${item.comment || item.Comment || '-'}</span></div>
             `;
         } else {
+            // بيانات بدل الفاقد (Lost)
             content = `
                 <div class="info-row"><span class="label">الاسم:</span><span class="val">${item.Name || '-'}</span></div>
-                <div class="info-row"><span class="label">الموبايل:</span><span class="val">${item.Phone || '-'}</span></div>
+                <div class="info-row"><span class="label">رقم الهاتف:</span><span class="val">${item.Phone || '-'}</span></div>
+                <div class="info-row"><span class="label">اسم الفرع:</span><span class="val">${item.Branch || '-'}</span></div>
                 <div class="info-row"><span class="label">التاريخ:</span><span class="val">${item.Date || '-'}</span></div>
+                <div class="info-row" style="border:none"><span class="label">الكومنت:</span><span class="val">${item.Comment || item.comment || '-'}</span></div>
             `;
         }
+        
         document.getElementById('resultArea').innerHTML = `<div class="card">${content}</div>`;
     }
 
-    // دعم زر Enter في الباسورد والبحث
+    // دعم زر الإدخال
     document.getElementById('passInput').addEventListener('keypress', e => { if(e.key === 'Enter') checkAuth(); });
     document.getElementById('idInput').addEventListener('keypress', e => { if(e.key === 'Enter') handleSearch(); });
 
